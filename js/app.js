@@ -1,8 +1,9 @@
 const githubForm = $("#github-form");
 const nameInput = $("#githubname");
 const clearLastUsers = $("#clear-last-users");
-const lastUsers = $("#last-users");
+const lastUsers = $("#last-searched");
 const github = new Github();
+const ui = new UI();
 
 eventListeners();
 
@@ -24,20 +25,33 @@ function getData(e){
         github.getGithubData(userName)
         .then(response => {
             if(response.user.message === "Not Found"){
-                // HATA
+                ui.showError("Kullanıcı bulunamadı...");
             }
             else{
-                console.log(response);
+                ui.showUserInfo(response.user);
+                ui.showRepoInfo(response.repo);
+                ui.addSearchedUser(userName);
+                Storage.addSearchedUser(userName);  
             }
         })
-        .catch(error => console.error(error));
+        .catch(error => ui.showError(error));
     }
+
+    ui.clearInput();
 }
 
 function clearAllSearched(){
-
+    Storage.clearAllSearched();
+    ui.clearAllSearched(); 
 }
 
 function getAllSearched(){
+    let users = Storage.getSearchedUsers();
+    let result = "";
+    users.forEach(user=>{
+        ui.addSearchedUser(user);
+        result += `<li class="list-group-item">${user}</li>`
+    });
 
+    lastUsers.html(result);
 }
